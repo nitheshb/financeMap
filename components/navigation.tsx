@@ -23,6 +23,10 @@ const routes = [
     label: "Transactions",
   },
   {
+    href: "/worksheets",
+    label: "Worksheet",
+  },
+  {
     href: "/accounts",
     label: "Accounts",
   },
