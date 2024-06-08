@@ -30,13 +30,13 @@ type Props = {
 
 export const SpendingPie = ({ data = [] }: Props) => {
   const [chartType, setChartType] = useState("pie");
-  const { shouldBlock, triggerPaywall } = usePaywall();
+  //const { shouldBlock, triggerPaywall } = usePaywall();
 
   const onTypeChange = (type: string) => {
-    if (type !== "pie" && shouldBlock) {
-      triggerPaywall();
-      return;
-    }
+    // if (type !== "pie" && shouldBlock) {
+    //   triggerPaywall();
+    //   return;
+    // }
 
     setChartType(type);
   };

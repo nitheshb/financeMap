@@ -75,3 +75,20 @@ export const subscriptions = pgTable("subscriptions", {
   subscriptionId: text("subscription_id").notNull().unique(),
   status: text("status").notNull(),
 });
+
+
+export const worksheets = pgTable("worksheets", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  address: text("address").notNull(),
+  amount: integer("amount").notNull(),
+  pillarsCount: integer("pillars_count").notNull(),
+  beamsCount: integer("beams_count").notNull(),
+  chainPulleys: text("chain_pulleys").notNull(),
+});
+
+
+
+export const insertWorksheetSchema = createInsertSchema(worksheets);
+
+
