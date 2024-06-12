@@ -1,34 +1,36 @@
 "use client";
 
-import { Loader2, Plus } from "lucide-react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/data-table";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UploadButton } from "./upload-button";
-import { Row } from "@tanstack/react-table";
 import { useNewWorksheet } from "@/features/worksheets/hooks/use-new-worksheet";
+import { useGetWorksheets } from "@/features/worksheets/api/use-get-worksheets";
 import { NewWorksheetSheet } from "@/features/worksheets/components/new-work-sheet";
-
-
-
+import { Row } from "@tanstack/react-table";
+import { UploadButton } from "./upload-button";
+import { Loader2, Plus } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { columns } from "./columns";
 
 const WorksheetPage = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [worksheets, setWorksheets] = useState([]);
-  const [isDisabled, setIsDisabled] = useState(false);
-  const { onOpen } = useNewWorksheet(); 
+  const [worksheets, setWorksheets] = useState([]); // Define the state for worksheets
+
+  const { onOpen } = useNewWorksheet();
+  const worksheetsQuery = useGetWorksheets();
 
   useEffect(() => {
-    // Simulate a loading state
-    setTimeout(() => {
+    // Update state when worksheets data is fetched
+    if (!worksheetsQuery.isLoading && worksheetsQuery.data) {
       setIsLoading(false);
-      setWorksheets([
-        /* Sample data */
-      ]);
-    }, 2000);
-  }, []);
+      setWorksheets(worksheetsQuery.data);
+    }
+  }, [worksheetsQuery.isLoading, worksheetsQuery.data]);
+
+  function handleUpload(results: any): void {
+    throw new Error("Function not implemented.");
+  }
 
   if (isLoading) {
     return (
@@ -53,24 +55,24 @@ const WorksheetPage = () => {
         <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
           <CardTitle className="text-xl line-clamp-1">Worksheet</CardTitle>
           <div className="flex flex-col lg:flex-row gap-y-2 items-center gap-x-2">
-            <Button 
-              onClick={onOpen} 
+            <Button
+              onClick={onOpen}
               size="sm"
               className="w-full lg:w-auto"
             >
               <Plus className="size-4 mr-2" />
               Add new
             </Button>
-            <UploadButton onUpload={() => {}} />
+            {/* Replace the previous UploadButton usage with the new one */}
+            <UploadButton onUpload={handleUpload} />
           </div>
         </CardHeader>
         <CardContent>
           <DataTable
             filterKey="title"
             data={worksheets}
-            disabled={isDisabled}
-            columns={[]}
-            onDelete={function (rows: Row<never>[]): void {
+            columns={columns}
+            onDelete={(rows: Row<never>[]): void => {
               throw new Error("Function not implemented.");
             }}
           />

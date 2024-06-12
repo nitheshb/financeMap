@@ -2,6 +2,8 @@ import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { formatCurrency } from "@/lib/utils"; // Adjust the import path according to your project structure
+
 
 export const columns = [
   {
@@ -91,8 +93,5 @@ export const columns = [
       </Button>
     ),
   },
-  {
-    id: "actions",
-    cell: () => <Actions />
-  }
+
 ];
