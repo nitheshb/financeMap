@@ -6,8 +6,8 @@ import summary from "./summary";
 import accounts from "./accounts";
 import categories from "./categories";
 import transactions from "./transactions";
-import worksheets from "./worksheets";
 import subscriptions from "./subscriptions";
+import worksheets from "./worksheets";
 
 export const runtime = "nodejs";
 
@@ -19,8 +19,8 @@ const routes = app
   .route("/accounts", accounts)
   .route("/categories", categories)
   .route("/transactions", transactions)
-  .route("/worksheets", worksheets)
   .route("/subscriptions", subscriptions)
+  .route("/worksheets", worksheets)
 
 export const GET = handle(app);
 export const POST = handle(app);

@@ -10,43 +10,65 @@ import { worksheets, insertWorksheetSchema } from "@/db/schema";
 
 const app = new Hono()
   .get(
-    "/worksheets",
+    "/",
     clerkMiddleware(),
     async (c) => {
-      const data = await db.select({
-        id: worksheets.id,
-        title: worksheets.title,
-        address: worksheets.address,
-        amount: worksheets.amount,
-        pillarsCount: worksheets.pillarsCount,
-        beamsCount: worksheets.beamsCount,
-        chainPulleys: worksheets.chainPulleys,
-      }).from(worksheets);
+      const auth = getAuth(c);
+
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const data = await db
+        .select({
+          id: worksheets.id,
+          title: worksheets.title,
+          address: worksheets.address,
+          amount: worksheets.amount,
+          pillarsCount: worksheets.pillarsCount,
+          beamsCount: worksheets.beamsCount,
+          chainPulleys: worksheets.chainPulleys,
+        })
+        .from(worksheets)
+        .where(eq(worksheets.userId, auth.userId));
 
       return c.json({ data });
   })
   .get(
-    "/worksheets/:id",
+    "/:id",
     zValidator("param", z.object({
       id: z.string().optional(),
     })),
     clerkMiddleware(),
     async (c) => {
+      const auth = getAuth(c);
       const { id } = c.req.valid("param");
 
       if (!id) {
         return c.json({ error: "Missing id" }, 400);
       }
+      
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
 
-      const [data] = await db.select({
-        id: worksheets.id,
-        title: worksheets.title,
-        address: worksheets.address,
-        amount: worksheets.amount,
-        pillarsCount: worksheets.pillarsCount,
-        beamsCount: worksheets.beamsCount,
-        chainPulleys: worksheets.chainPulleys,
-      }).from(worksheets).where(eq(worksheets.id, id));
+      const [data] = await db
+        .select({
+          id: worksheets.id,
+          title: worksheets.title,
+          address: worksheets.address,
+          amount: worksheets.amount,
+          pillarsCount: worksheets.pillarsCount,
+          beamsCount: worksheets.beamsCount,
+          chainPulleys: worksheets.chainPulleys,
+        })
+        .from(worksheets)
+        .where(
+          and(
+            eq(worksheets.userId, auth.userId),
+            eq(worksheets.id, id)
+          ),
+        );
       
       if (!data) {
         return c.json({ error: "Not found" }, 404);
@@ -56,23 +78,66 @@ const app = new Hono()
     }
   )
   .post(
-    "/worksheets",
+    "/",
     clerkMiddleware(),
-    zValidator("json", insertWorksheetSchema.omit({
-      id: true,
+    zValidator("json", insertWorksheetSchema.pick({
+      title: true,
+      address: true,
+      amount: true,
+      pillarsCount: true,
+      beamsCount: true,
+      chainPulleys: true,
     })),
     async (c) => {
+      const auth = getAuth(c);
       const values = c.req.valid("json");
+
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
 
       const [data] = await db.insert(worksheets).values({
         id: createId(),
+        userId: auth.userId,
         ...values,
       }).returning();
 
       return c.json({ data });
   })
+  .post(
+    "/bulk-delete",
+    clerkMiddleware(),
+    zValidator(
+      "json",
+      z.object({
+        ids: z.array(z.string()),
+      }),
+    ),
+    async (c) => {
+      const auth = getAuth(c);
+      const values = c.req.valid("json");
+
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const data = await db
+        .delete(worksheets)
+        .where(
+          and(
+            eq(worksheets.userId, auth.userId),
+            inArray(worksheets.id, values.ids)
+          )
+        )
+        .returning({
+          id: worksheets.id,
+        });
+
+      return c.json({ data });
+    },
+  )
   .patch(
-    "/worksheets/:id",
+    "/:id",
     clerkMiddleware(),
     zValidator(
       "param",
@@ -82,11 +147,17 @@ const app = new Hono()
     ),
     zValidator(
       "json",
-      insertWorksheetSchema.omit({
-        id: true,
+      insertWorksheetSchema.pick({
+        title: true,
+        address: true,
+        amount: true,
+        pillarsCount: true,
+        beamsCount: true,
+        chainPulleys: true,
       })
     ),
     async (c) => {
+      const auth = getAuth(c);
       const { id } = c.req.valid("param");
       const values = c.req.valid("json");
 
@@ -94,10 +165,19 @@ const app = new Hono()
         return c.json({ error: "Missing id" }, 400);
       }
 
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
       const [data] = await db
         .update(worksheets)
         .set(values)
-        .where(eq(worksheets.id, id))
+        .where(
+          and(
+            eq(worksheets.userId, auth.userId),
+            eq(worksheets.id, id),
+          ),
+        )
         .returning();
 
       if (!data) {
@@ -108,7 +188,7 @@ const app = new Hono()
     },
   )
   .delete(
-    "/worksheets/:id",
+    "/:id",
     clerkMiddleware(),
     zValidator(
       "param",
@@ -117,14 +197,25 @@ const app = new Hono()
       }),
     ),
     async (c) => {
+      const auth = getAuth(c);
       const { id } = c.req.valid("param");
 
       if (!id) {
         return c.json({ error: "Missing id" }, 400);
       }
 
-      const [data] = await db        .delete(worksheets)
-        .where(eq(worksheets.id, id))
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const [data] = await db
+        .delete(worksheets)
+        .where(
+          and(
+            eq(worksheets.userId, auth.userId),
+            eq(worksheets.id, id),
+          ),
+        )
         .returning({
           id: worksheets.id,
         });

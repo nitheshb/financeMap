@@ -80,6 +80,7 @@ export const subscriptions = pgTable("subscriptions", {
 
 export const worksheets = pgTable("worksheets", {
   id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   title: text("title").notNull(),
   address: text("address").notNull(),
   amount: integer("amount").notNull(),

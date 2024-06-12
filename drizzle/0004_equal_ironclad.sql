@@ -1,0 +1,1 @@
+ALTER TABLE "worksheets" ADD COLUMN "user_id" text NOT NULL;
