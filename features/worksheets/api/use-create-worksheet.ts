@@ -10,7 +10,11 @@ type RequestType = InferRequestType<typeof client.api.worksheets.$post>["json"];
 export const useCreateWorksheet = () => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation<ResponseType, Error, RequestType>({
+  const mutation = useMutation<
+    ResponseType,
+    Error,
+    RequestType
+  >({
     mutationFn: async (json) => {
       const response = await client.api.worksheets.$post({ json });
       return await response.json();

@@ -1,4 +1,5 @@
-import { useForm, ControllerRenderProps } from "react-hook-form";
+import React from "react";
+import { useForm, ControllerRenderProps, ControllerFieldState, UseFormStateReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -16,18 +17,26 @@ import {
 const formSchema = z.object({
   title: z.string().nonempty("Worksheet name is required"),
   address: z.string().nonempty("Address is required"),
-  amount: z.number().nonnegative("Amount must be a positive number"),
-  pillarsCount: z.number().nonnegative("Pillars count must be a positive number"),
-  beamsCount: z.number().nonnegative("Beams count must be a positive number"),
+  amount: z.preprocess((val) => Number(val), z.number().nonnegative("Amount must be a positive number")),
+  pillarsCount: z.preprocess((val) => Number(val), z.number().nonnegative("Pillars count must be a positive number")),
+  beamsCount: z.preprocess((val) => Number(val), z.number().nonnegative("Beams count must be a positive number")),
   chainPulleys: z.enum(["yes", "no"]).refine(val => val === "yes" || val === "no", {
     message: "Chain pulleys must be 'yes' or 'no'",
   }),
 });
 
+
 type FormValues = z.input<typeof formSchema>;
 
 interface WorksheetFormProps {
-  onSubmit: (values: FormValues) => void;
+  onSubmit: (values: {
+    title: string;
+    address: string;
+    amount: number; 
+    pillarsCount: number; 
+    beamsCount: number; 
+    chainPulleys: "yes" | "no";
+  }) => Promise<void>;
   disabled: boolean;
 }
 
@@ -36,8 +45,17 @@ export const WorksheetForm: React.FC<WorksheetFormProps> = ({ onSubmit, disabled
     resolver: zodResolver(formSchema),
   });
 
-  const handleSubmit = (values: FormValues) => {
-    onSubmit(values);
+  
+  const handleSubmit = async (values: FormValues) => { 
+    
+    const { amount, pillarsCount, beamsCount, ...rest } = values;
+    
+    await onSubmit({
+      ...rest,
+      amount: typeof amount === 'number' ? amount : 0,
+      pillarsCount: typeof pillarsCount === 'number' ? pillarsCount : 0,
+      beamsCount: typeof beamsCount === 'number' ? beamsCount : 0,
+    });
   };
 
   return (
@@ -46,72 +64,109 @@ export const WorksheetForm: React.FC<WorksheetFormProps> = ({ onSubmit, disabled
         <FormField
           name="title"
           control={form.control}
-          render={({ field }: ControllerRenderProps<FormValues, "title">) => (
+          render={({ field, fieldState, formState }: {
+            field: ControllerRenderProps<FormValues, "title">,
+            fieldState: ControllerFieldState,
+            formState: UseFormStateReturn<FormValues>
+          }) => (
             <FormItem>
               <FormLabel>Worksheet Name</FormLabel>
               <FormControl>
                 <Input disabled={disabled} placeholder="Worksheet name" {...field} />
               </FormControl>
-              <FormMessage>{field.error?.message}</FormMessage>
+              <FormMessage>{fieldState.error?.message}</FormMessage>
             </FormItem>
           )}
         />
         <FormField
           name="address"
           control={form.control}
-          render={({ field }: ControllerRenderProps<FormValues, "address">) => (
+          render={({ field, fieldState }: {
+            field: ControllerRenderProps<FormValues, "address">,
+            fieldState: ControllerFieldState
+          }) => (
             <FormItem>
               <FormLabel>Address</FormLabel>
               <FormControl>
                 <Input disabled={disabled} placeholder="Address" {...field} />
               </FormControl>
-              <FormMessage>{field.error?.message}</FormMessage>
+              <FormMessage>{fieldState.error?.message}</FormMessage>
             </FormItem>
           )}
         />
         <FormField
           name="amount"
           control={form.control}
-          render={({ field }: ControllerRenderProps<FormValues, "amount">) => (
+          render={({ field, fieldState }: {
+            field: ControllerRenderProps<FormValues, "amount">,
+            fieldState: ControllerFieldState
+          }) => (
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <Input type="number" disabled={disabled} placeholder="0.00" {...field} />
+                <Input
+                  type="number"
+                  disabled={disabled}
+                  placeholder="0.00"
+                  value={field.value === undefined ? "" : String(field.value)}
+                  onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")}
+                />
               </FormControl>
-              <FormMessage>{field.error?.message}</FormMessage>
+              <FormMessage>{fieldState.error?.message}</FormMessage>
             </FormItem>
           )}
         />
         <FormField
           name="pillarsCount"
           control={form.control}
-          render={({ field }: ControllerRenderProps<FormValues, "pillarsCount">) => (
+          render={({ field, fieldState }: {
+            field: ControllerRenderProps<FormValues, "pillarsCount">,
+            fieldState: ControllerFieldState
+          }) => (
             <FormItem>
               <FormLabel>Pillars Count</FormLabel>
               <FormControl>
-                <Input type="number" disabled={disabled} placeholder="Pillars count" {...field} />
+                <Input
+                  type="number"
+                  disabled={disabled}
+                  placeholder="Pillars count"
+                  value={field.value === undefined ? "" : String(field.value)}
+                  onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")}
+                />
               </FormControl>
-              <FormMessage>{field.error?.message}</FormMessage>
+              <FormMessage>{fieldState.error?.message}</FormMessage>
             </FormItem>
           )}
         />
         <FormField
           name="beamsCount"
           control={form.control}
-          render={({ field }: ControllerRenderProps<FormValues, "beamsCount">) => (
+          render={({ field, fieldState }: {
+            field: ControllerRenderProps<FormValues, "beamsCount">,
+            fieldState: ControllerFieldState
+          }) => (
             <FormItem>
               <FormLabel>Beams Count</FormLabel>
               <FormControl>
-                <Input type="number" disabled={disabled} placeholder="Beams count" {...field} />
+                <Input
+                  type="number"
+                  disabled={disabled}
+                  placeholder="Beams count"
+                  value={field.value === undefined ? "" : String(field.value)}
+                  onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")}
+                />
               </FormControl>
-              <FormMessage>{field.error?.message}</FormMessage>
+              <FormMessage>{fieldState.error?.message}</FormMessage>
             </FormItem>
           )}
         />
         <FormField
           name="chainPulleys"
           control={form.control}
-          render={({ field }: ControllerRenderProps<FormValues, "chainPulleys">) => (
+          render={({ field, fieldState }: {
+            field: ControllerRenderProps<FormValues, "chainPulleys">,
+            fieldState: ControllerFieldState
+          }) => (
             <FormItem>
               <FormLabel>Chain Pulleys</FormLabel>
               <FormControl>
@@ -123,7 +178,7 @@ export const WorksheetForm: React.FC<WorksheetFormProps> = ({ onSubmit, disabled
                   disabled={disabled}
                 />
               </FormControl>
-              <FormMessage>{field.error?.message}</FormMessage>
+              <FormMessage>{fieldState.error?.message}</FormMessage>
             </FormItem>
           )}
         />
@@ -134,3 +189,4 @@ export const WorksheetForm: React.FC<WorksheetFormProps> = ({ onSubmit, disabled
     </Form>
   );
 };
+

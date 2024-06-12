@@ -77,6 +77,7 @@ export const subscriptions = pgTable("subscriptions", {
 });
 
 
+
 export const worksheets = pgTable("worksheets", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
@@ -87,8 +88,7 @@ export const worksheets = pgTable("worksheets", {
   chainPulleys: text("chain_pulleys").notNull(),
 });
 
-
-
 export const insertWorksheetSchema = createInsertSchema(worksheets);
+
 
 

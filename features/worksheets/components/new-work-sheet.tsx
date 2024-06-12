@@ -1,8 +1,12 @@
+import React, { useState } from "react";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
+
 import { WorksheetForm } from "@/features/worksheets/components/worksheet-form";
 import { useNewWorksheet } from "@/features/worksheets/hooks/use-new-worksheet";
 import { useCreateWorksheet } from "@/features/worksheets/api/use-create-worksheet";
+
+import { insertWorksheetSchema } from "@/db/schema";
 import {
   Sheet,
   SheetContent,
@@ -11,30 +15,37 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-const formSchema = z.object({
-  title: z.string().nonempty("Worksheet name is required"),
-  address: z.string().nonempty("Address is required"),
-  amount: z.number().nonnegative("Amount must be a positive number"),
-  pillarsCount: z.number().nonnegative("Pillars count must be a positive number"),
-  beamsCount: z.number().nonnegative("Beams count must be a positive number"),
-  chainPulleys: z.enum(["yes", "no"]),
+const formSchema = insertWorksheetSchema.omit({
+  id: true,
 });
+
 
 type FormValues = z.input<typeof formSchema>;
 
 export const NewWorksheetSheet = () => {
   const { isOpen, onClose } = useNewWorksheet();
+  const [isCreating, setIsCreating] = useState(false); 
   const createMutation = useCreateWorksheet();
 
-  const isPending = createMutation.isPending;
-  const isLoading = false; 
+  
+  const onSubmit = async (values: FormValues) => {
+    setIsCreating(true); 
+    try {
+      
+      const { amount = 0, pillarsCount = 0, beamsCount = 0, ...rest } = values;
 
-  const onSubmit = (values: FormValues) => {
-    createMutation.mutate(values, {
-      onSuccess: () => {
-        onClose();
-      },
-    });
+    
+      await createMutation.mutateAsync({
+        ...rest,
+        amount,
+        pillarsCount,
+        beamsCount,
+      });
+      onClose(); 
+    } catch (error) {
+      setIsCreating(false);
+      console.error("Error creating worksheet:", error); 
+    }
   };
 
   return (
@@ -44,12 +55,12 @@ export const NewWorksheetSheet = () => {
           <SheetTitle>New Worksheet</SheetTitle>
           <SheetDescription>Add a new worksheet</SheetDescription>
         </SheetHeader>
-        {isLoading ? (
+        {isCreating ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <Loader2 className="size-4 text-muted-foreground animate-spin" />
           </div>
         ) : (
-          <WorksheetForm onSubmit={onSubmit} disabled={isPending} />
+          <WorksheetForm onSubmit={onSubmit} disabled={isCreating} />
         )}
       </SheetContent>
     </Sheet>
