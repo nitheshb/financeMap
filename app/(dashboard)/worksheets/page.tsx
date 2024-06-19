@@ -13,18 +13,41 @@ import { Loader2, Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { columns } from "./columns";
 
+
+// enum  {
+//   LIST = "LIST",
+//   IMPORT = "IMPORT"
+// };
+
+// const worksheets1: {
+//   id: string;
+//   title: string;
+//   address: string;
+//   amount: number;
+//   pillarsCount: number;
+//   beamsCount: number;
+//   chainPulleys: string;
+// }[]
+
+
 const WorksheetPage = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [worksheets, setWorksheets] = useState([]); 
+  //const [worksheets, setWorksheets] = useState(worksheets1);
+   
+  
+  //const worksheets = worksheetsQuery.data || [];
 
   const { onOpen } = useNewWorksheet();
   const worksheetsQuery = useGetWorksheets();
+
+  
 
   useEffect(() => {
   
     if (!worksheetsQuery.isLoading && worksheetsQuery.data) {
       setIsLoading(false);
-      setWorksheets(worksheetsQuery.data);
+     const worksheets  =  worksheetsQuery.data || []
+      ///setWorksheets(worksheets);
     }
   }, [worksheetsQuery.isLoading, worksheetsQuery.data]);
 
@@ -66,7 +89,7 @@ const WorksheetPage = () => {
             <UploadButton onUpload={handleUpload} />
           </div>
         </CardHeader>
-        <CardContent>
+        {/* <CardContent>
           <DataTable
             filterKey="title"
             data={worksheets}
@@ -75,7 +98,7 @@ const WorksheetPage = () => {
               throw new Error("Function not implemented.");
             }}
           />
-        </CardContent>
+        </CardContent> */}
       </Card>
       <NewWorksheetSheet />
     </div>
