@@ -15,13 +15,13 @@ import { columns } from "./columns";
 
 const WorksheetPage = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [worksheets, setWorksheets] = useState([]); // Define the state for worksheets
+  const [worksheets, setWorksheets] = useState([]); 
 
   const { onOpen } = useNewWorksheet();
   const worksheetsQuery = useGetWorksheets();
 
   useEffect(() => {
-    // Update state when worksheets data is fetched
+  
     if (!worksheetsQuery.isLoading && worksheetsQuery.data) {
       setIsLoading(false);
       setWorksheets(worksheetsQuery.data);
@@ -63,7 +63,6 @@ const WorksheetPage = () => {
               <Plus className="size-4 mr-2" />
               Add new
             </Button>
-            {/* Replace the previous UploadButton usage with the new one */}
             <UploadButton onUpload={handleUpload} />
           </div>
         </CardHeader>

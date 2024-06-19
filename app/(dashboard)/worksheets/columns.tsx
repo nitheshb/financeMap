@@ -1,11 +1,21 @@
+"use client"
+
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatCurrency } from "@/lib/utils"; // Adjust the import path according to your project structure
+import { InferResponseType } from "hono";
+import { client } from "@/lib/hono";
+import { ColumnDef } from "@tanstack/react-table";
 
 
-export const columns = [
+
+export type ResponseType = InferResponseType<typeof client.api.worksheets.$get, 200>["data"][0];
+
+
+
+export const columns: ColumnDef<ResponseType>[] = [
   {
     id: "select",
     header: ({ table }) => (
