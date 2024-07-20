@@ -93,3 +93,48 @@ export const insertWorksheetSchema = createInsertSchema(worksheets);
 
 
 
+
+// export const events = pgTable("events", {
+//   id: text("id").primaryKey(),
+//   amount: integer("amount").notNull(),
+//   host: text("host").notNull(), // Changed `payee` to `host`
+//   description: text("description"), // Changed `notes` to `description`
+//   date: timestamp("date", { mode: "date" }).notNull(),
+//   accountId: text("account_id").references(() => accounts.id, {
+//     onDelete: "cascade",
+//   }).notNull(),
+//   categoryId: text("category_id").references(() => categories.id, {
+//     onDelete: "set null",
+//   }),
+// });
+
+// export const eventsRelations = relations(events, ({ one }) => ({
+//   account: one(accounts, {
+//     fields: [events.accountId],
+//     references: [accounts.id],
+//   }),
+//   categories: one(categories, {
+//     fields: [events.categoryId],
+//     references: [categories.id],
+//   }),
+// }));
+
+// export const insertEventSchema = createInsertSchema(events, {
+//   date: z.coerce.date(),
+// });
+
+
+
+
+
+
+export const events = pgTable("events", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  date: text("date").notNull(),
+  location: text("location").notNull(),
+  userId: text("user_id").notNull(),
+});
+
+export const insertEventSchema = createInsertSchema(events);

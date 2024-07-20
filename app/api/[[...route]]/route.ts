@@ -8,6 +8,8 @@ import categories from "./categories";
 import transactions from "./transactions";
 import subscriptions from "./subscriptions";
 import worksheets from "./worksheets";
+import events from "./events";
+
 
 export const runtime = "nodejs";
 
@@ -21,6 +23,7 @@ const routes = app
   .route("/transactions", transactions)
   .route("/subscriptions", subscriptions)
   .route("/worksheets", worksheets)
+  .route("/events", events)
 
 export const GET = handle(app);
 export const POST = handle(app);
