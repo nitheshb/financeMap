@@ -19,6 +19,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { addTransaction } from "@/db/dbQueryFirebase";
 
 const formSchema = insertTransactionSchema.omit({
   id: true,
@@ -61,11 +62,15 @@ export const NewTransactionSheet = () => {
     accountQuery.isLoading;
 
   const onSubmit = (values: FormValues) => {
-    createMutation.mutate(values, {
-      onSuccess: () => {
-        onClose();
-      },
-    });
+    addTransaction(values).then((res) => {
+      console.log('res is', res)
+      onClose();
+    })
+    // createMutation.mutate(values, {
+    //   onSuccess: () => {
+    //     onClose();
+    //   },
+    // });
   };
 
   return (

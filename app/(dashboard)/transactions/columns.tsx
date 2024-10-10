@@ -54,11 +54,14 @@ export const columns: ColumnDef<ResponseType>[] = [
       )
     },
     cell: ({ row }) => {
-      const date = row.getValue("date") as Date;
+      const date = row.getValue("date");
+      const jsDate = date.toDate() as Date;
 
       return (
         <span>
-          {format(date, "dd MMMM, yyyy")}
+          {format(jsDate, "dd MMMM, yyyy")}
+          
+           {/* {date?.toDateString()} */}
         </span>
       )
     }

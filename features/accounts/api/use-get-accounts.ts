@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { client } from "@/lib/hono";
+import { fetchPrideStalls } from "@/db/dbQueryFirebase";
 
 export const useGetAccounts = () => {
   const query = useQuery({
@@ -19,3 +20,21 @@ export const useGetAccounts = () => {
 
   return query;
 };
+
+export const useGetPrideStalls = () => {
+  const query = useQuery({
+    queryKey: ["pride_stall"],
+    queryFn: fetchPrideStalls,
+    // This option ensures that the query remains active and receives real-time updates
+    // refetchInterval: false,
+    // refetchIntervalInBackground: false,
+    // refetchOnWindowFocus: false,
+    // refetchOnReconnect: false,
+  });
+
+  return query;
+};
+function setLeadsFetchedData(usersListA: any) {
+  throw new Error("Function not implemented.");
+}
+

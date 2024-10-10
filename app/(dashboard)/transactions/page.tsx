@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Plus } from "lucide-react";
 
 import { useNewTransaction } from "@/features/transactions/hooks/use-new-transaction";
@@ -25,6 +25,7 @@ import {
 import { columns } from "./columns";
 import { ImportCard } from "./import-card";
 import { UploadButton } from "./upload-button";
+import { steamStallsList, steamTransactionsList } from "@/db/dbQueryFirebase";
 
 enum VARIANTS {
   LIST = "LIST",
@@ -41,6 +42,8 @@ const TransactionsPage = () => {
   const [AccountDialog, confirm] = useSelectAccount();
   const [variant, setVariant] = useState<VARIANTS>(VARIANTS.LIST);
   const [importResults, setImportResults] = useState(INITIAL_IMPORT_RESULTS);
+  const [leadsFetchedData, setLeadsFetchedData] = useState([])
+  const [accountsA, setAccountA] = useState([])
 
   const onUpload = (results: typeof INITIAL_IMPORT_RESULTS) => {
     console.log({ results });
@@ -62,6 +65,51 @@ const TransactionsPage = () => {
   const isDisabled =
     transactionsQuery.isLoading ||
     deleteTransactions.isPending;
+    useEffect(() => {
+      getAccountsFun()
+    }, [])
+    const getAccountsFun = async () => {
+      const unsubscribe = steamStallsList(
+        'pride',
+        (querySnapshot:any) => {
+          const usersListA = querySnapshot.docs.map((docSnapshot:any) =>
+            docSnapshot.data()
+          )
+          console.log('fetched details are', usersListA)
+         
+          setAccountA(usersListA)
+        },
+        () => setAccountA([])
+      )
+    
+      return unsubscribe
+      
+    } 
+    useEffect(() => {
+      getLeadsDataFun()
+    }, [accountsA])
+    const getLeadsDataFun = async () => {
+      const unsubscribe = steamTransactionsList(
+        'pride',
+        (querySnapshot:any) => {
+          const usersListA = querySnapshot.docs.map((docSnapshot:any) =>
+            docSnapshot.data()
+          )
+          console.log('fetched details are', usersListA)
+          usersListA.map((user:any) => {
+           const x =  accountsA.find((account:any) => account.uId === user.accountId)?.name
+           console.log('found account is', accountsA,  accountsA.find((account:any) => 1 === 1), x)
+          
+            user.account = x
+          })
+          setLeadsFetchedData(usersListA)
+        },
+        () => setLeadsFetchedData([])
+      )
+    
+      return unsubscribe
+      
+    }  
 
   const onSubmitImport = async (
     values: typeof transactionSchema.$inferInsert[],
@@ -137,7 +185,7 @@ const TransactionsPage = () => {
           <DataTable
             filterKey="payee"
             columns={columns} 
-            data={transactions}
+            data={leadsFetchedData}
             onDelete={(row) => {
               const ids = row.map((r) => r.original.id);
               deleteTransactions.mutate({ ids });

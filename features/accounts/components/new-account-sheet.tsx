@@ -12,6 +12,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { createEvent, createStall } from "@/db/dbQueryFirebase";
 
 const formSchema = insertAccountSchema.pick({
   name: true,
@@ -25,11 +26,13 @@ export const NewAccountSheet = () => {
   const mutation = useCreateAccount();
 
   const onSubmit = (values: FormValues) => {
-    mutation.mutate(values, {
-      onSuccess: () => {
-        onClose();
-      },
-    });
+  
+    createStall(values)
+    // mutation.mutate(values, {
+    //   onSuccess: () => {
+    //     onClose();
+    //   },
+    // });
   };
 
   return (

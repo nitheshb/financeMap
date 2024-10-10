@@ -19,6 +19,13 @@ const routes = [
     label: "Overview",
   },
   {
+    href: "/events",
+    label: "Events/Business",
+  }, {
+    href: "/accounts",
+    label: "Stalls",
+  },
+  {
     href: "/transactions",
     label: "Transactions",
   },

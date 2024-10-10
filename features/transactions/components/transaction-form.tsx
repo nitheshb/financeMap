@@ -19,6 +19,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useEffect, useState } from "react";
+import { steamStallsList } from "@/db/dbQueryFirebase";
+import path from "path";
 
 const formSchema = z.object({
   date: z.coerce.date(),
@@ -63,14 +66,45 @@ export const TransactionForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues,
   });
+  const [leadsFetchedData, setLeadsFetchedData] = useState([])
+  const [stallsOptions, setStallsOptions] = useState<Props['categoryOptions']>([])
+  useEffect(() => {
+    getLeadsDataFun()
+  }, [])
+  
+  const getLeadsDataFun = async () => {
+    const unsubscribe = steamStallsList(
+      'pride',
+      (querySnapshot:any) => {
+        const usersListA = querySnapshot.docs.map((docSnapshot:any) =>
+          docSnapshot.data()
+        )
+        console.log('fetched details are', usersListA)
+        setLeadsFetchedData(usersListA)
+      },
+      () => setLeadsFetchedData([])
+    )
+  
+    return unsubscribe
+    
+  }
+  useEffect(() => {
+    const categoryOptions = (leadsFetchedData ?? []).map((category:any) => ({
+      label: category?.name,
+      value: category?.uId,
+    }));
+    setStallsOptions(categoryOptions)
+    console.log('effect options', categoryOptions)
+
+  }, [leadsFetchedData])
 
   const handleSubmit = (values: FormValues) => {
     const amount = parseFloat(values.amount);
-    const amountInMiliunits = convertAmountToMiliunits(amount);
+    // const amountInMiliunits = convertAmountToMiliunits(amount);
 
     onSubmit({
       ...values,
-      amount: amountInMiliunits,
+      amount: amount,
     });
   };
 
@@ -110,7 +144,7 @@ export const TransactionForm = ({
               <FormControl>
                 <Select
                   placeholder="Select an account"
-                  options={accountOptions}
+                  options={stallsOptions}
                   onCreate={onCreateAccount}
                   value={field.value}
                   onChange={field.onChange}
@@ -131,9 +165,9 @@ export const TransactionForm = ({
               <FormControl>
                 <Select
                   placeholder="Select a category"
-                  options={categoryOptions}
+                  options={stallsOptions}
                   onCreate={onCreateCategory}
-                  value={field.value}
+                  value={field.value || ''}
                   onChange={field.onChange}
                   disabled={disabled}
                 />
